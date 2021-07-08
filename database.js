@@ -1,4 +1,4 @@
-const books = [
+let books = [
     {
         ISBN: "12345Book",
         title: "Getting started with MERN",
@@ -8,6 +8,16 @@ const books = [
         author: [1,2],
         publication: [1],
         category: ["tech", "Programming", "Education", "triller",]
+    },
+    {
+        ISBN: "123Success",
+        title: "Getting started with SuccessRule",
+        pubDate: "2020-11-20",
+        langauge: "en",
+        numPage: 300,
+        author: [2],
+        publication: [2,3],
+        category: ["Goal", "Success", "Life", "triller",]
     },
 ];
 
@@ -38,7 +48,7 @@ const publications = [
     {
         id: 3,
         name: "firebase",
-        books: [],
+        books: ["12Hello"],
     },
 ];
 

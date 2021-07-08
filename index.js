@@ -284,13 +284,13 @@ booky.put("/book/update/author/:isbn/:authorId", (req, res) => {
         }
     });
     // Update author database
-   databse.authors.forEach((author) => {
-    if (author.id === parseInt(req.params.authorId)){
-        return author.book.push(req.params.isbn);
-    }
-   });
+    databse.authors.forEach((author) => {
+        if (author.id === parseInt(req.params.authorId)) {
+            return author.book.push(req.params.isbn);
+        }
+    });
 
-   return res.json({ books: databse.books , author: databse.authors});
+    return res.json({ books: databse.books, author: databse.authors });
 });
 //------------------------------ERROR------------------ERROR--------------------ERROR-------------------------------
 
@@ -304,23 +304,23 @@ booky.put("/book/update/author/:isbn/:authorId", (req, res) => {
 */
 
 booky.put("/publication/update/book/:isbn", (req, res) => {
-   
+
     // update the publication database
     databse.publications.forEach((publication) => {
-        if(publication.id === req.body.pubId) {
+        if (publication.id === req.body.pubId) {
             return publication.books.push(req.params.isbn);
         }
     });
 
     // update the book database
     databse.books.forEach((book) => {
-        if(book.ISBN === req.params.isbn) {
+        if (book.ISBN === req.params.isbn) {
             book.publication = req.body.pubId;
             return;
         }
     });
 
-    return res.json({ books : databse.books, publications: databse.publications, message: "Successfully updated publication", });
+    return res.json({ books: databse.books, publications: databse.publications, message: "Successfully updated publication", });
 });
 
 /** 
@@ -364,6 +364,131 @@ booky.put("/publication/update/name/:id", (req, res) => {
 
     return res.json({ publications: databse.publications });
     // map .. is create new array for changes.
+});
+
+/** 
+ * Route            /book/delete
+ * Description      Delete a book
+ * Access           PUBLIC
+ * Parameter        ISBN
+ * Methods          DELETE
+ * 
+*/
+
+booky.delete("/book/delete/:isbn", (req, res) => {
+
+    // Replace the whole database
+
+    const updatedBookDatabase = databse.books.filter((book) =>
+        book.ISBN !== req.params.isbn);
+    // filter return new array.. so need to store data in new array that's why we need to generate new array
+    databse.books = updatedBookDatabase;
+    return res.json({ books: databse.books });
+    // Edit at single point directly to master object
+});
+
+/** 
+ * Route            /book/delete/author
+ * Description      Delete a author and book bt isbn
+ * Access           PUBLIC
+ * Parameter        ISBN AuthorId
+ * Methods          DELETE
+ * 
+*/
+
+booky.delete("/book/delete/author/:isbn/:authorId", (req, res) => {
+    // update the book database
+    databse.books.forEach((book) => {
+        if (book.ISBN === req.params.isbn) {
+            const newAuthorList = book.author.filter((author) => author !== parseInt(req.params.authorId));
+            book.author = newAuthorList;
+            return;
+        }
+    });
+    
+    // update the author database
+    databse.authors.forEach((author) => {
+        if(author.id === parseInt(req.params.authorId)){
+            const newBookList = author.books.filter((book) => book !== req.params.isbn);
+            author.books = newBookList;
+            return;
+        };
+    });
+
+    return res.json ({book: databse.books, author: databse.authors, message: "Author was deleted!!!!!" });
+});
+
+/** 
+ * Route            /author/delete
+ * Description      Delete a author
+ * Access           PUBLIC
+ * Parameter        id
+ * Methods          DELETE
+ * 
+*/
+
+booky.delete("/author/delete/:id", (req, res) => {
+
+    // Replace the whole database
+
+    const updatedAuthorDatabase = databse.authors.filter((author) =>
+        author.id !== parseInt(req.params.id));
+    // filter return new array.. so need to store data in new array that's why we need to generate new array
+    databse.authors = updatedAuthorDatabase;
+    return res.json({ authors: databse.authors, message: "delete author" });
+    // Edit at single point directly to master object
+});
+
+/** 
+ * Route            /publication/delete
+ * Description      Delete a publication
+ * Access           PUBLIC
+ * Parameter        id
+ * Methods          DELETE
+ * 
+*/
+
+booky.delete("/publication/delete/:id", (req, res) => {
+
+    // Replace the whole database
+
+    const updatedPubDatabase = databse.publications.filter((publication) =>
+    publication.id !== parseInt(req.params.id));
+    // filter return new array.. so need to store data in new array that's why we need to generate new array
+    databse.publications = updatedPubDatabase;
+    return res.json({ publications: databse.publications, message: "delete publication" });
+    // Edit at single point directly to master object
+});
+
+/** 
+ * Route            /book/delete/publication
+ * Description      Delete a author and book bt isbn
+ * Access           PUBLIC
+ * Parameter        ISBN PubId
+ * Methods          DELETE
+ * 
+*/
+
+booky.delete("/book/delete/publication/:isbn/:pubId", (req, res) => {
+    // update the book database
+    databse.books.forEach((book) => {
+        if (book.ISBN === req.params.isbn) {
+            const newPubList = book.publication.filter((publication) => publication !== parseInt(req.params.pubId));
+            book.publication = newPubList;
+            return;
+        }
+    });
+    
+    // update the author database
+    databse.publications.forEach((publication) => {
+        if(publication.id === parseInt(req.params.pubId)){
+            const newBookList = publication.books.filter((book) => book !== req.params.isbn);
+            publication.books = newBookList;
+            return;
+        };
+    });
+
+    return res.json ({book: databse.books, publication: databse.publications, message: "Publication was deleted!!!!!" });
 });
 
 booky.listen(3000, () => console.log("Hey, server is running !!"));
