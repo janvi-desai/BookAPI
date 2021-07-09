@@ -7,9 +7,9 @@ const mongoose = require("mongoose");
 const databse = require("./database/database");
 
 // models
-const BookModels = require("./database/book");
-const AuthorModels = require("./database/author");
-const PublicationModels = require("./database/pulication");
+const BookModel = require("./database/book");
+const AuthorModel = require("./database/author");
+const PublicationModel = require("./database/pulication");
 
 // Initialization
 const booky = express();
@@ -35,22 +35,27 @@ mongoose.connect(process.env.MONGO_URL, {
 
 // Where Data ????...
 
-booky.get("/", (req, res) => {
-    return res.json({ books: databse.books });
+booky.get("/", async (req, res) => {
+    const getAllBooks = await BookModel.find();
+    return res.json(getAllBooks);
 });
 
 /** 
  * Route            /:isbn
- * Description      Get specific books
+ * Description      Get specific books based on isbn
  * Access           PUBLIC
  * Parameter        isbn
  * Methods          GET
 */
 
-booky.get("/isbn/:isbn", (req, res) => {
-    const getSpecificBook = databse.books.filter((book) => book.ISBN === req.params.isbn);
+booky.get("/isbn/:isbn", async (req, res) => {
+    
+    const getSpecificBook = await BookModel.findOne({ ISBN: req.params.isbn });
+    // null -> fasle.. value -> true
 
-    if (getSpecificBook.length === 0) {
+    // const getSpecificBook = databse.books.filter((book) => book.ISBN === req.params.isbn);
+
+    if (!getSpecificBook) {
         return res.json({
             error: `No book found for the ISBN of ${req.params.isbn}`
         });
@@ -61,6 +66,23 @@ booky.get("/isbn/:isbn", (req, res) => {
 });
 
 /** 
+ * Route            /base/id
+ * Description      Get specific books based on author
+ * Access           PUBLIC
+ * Parameter        author
+ * Methods          GET
+*/
+
+booky.get("/base/:id", async (req, res) => {
+    const getSpecificBook = await BookModel.findOne({ author: req.params.id});
+
+    if(!getSpecificBook){
+        return res.json({ Error: `no book found base on ${req.params.id}` });
+    }
+    return res.json({ book: getSpecificBook });
+});
+
+/** 
  * Route            /c
  * Description      Get specific books based on category
  * Access           PUBLIC
@@ -68,10 +90,13 @@ booky.get("/isbn/:isbn", (req, res) => {
  * Methods          GET
 */
 
-booky.get("/c/:category", (req, res) => {
-    const getSpecificBook = databse.books.filter((book) => book.category.includes(req.params.category));
+booky.get("/c/:category", async (req, res) => {
+    
+    const getSpecificBook = await BookModel.findOne({ category: req.params.category });
+    
+    // const getSpecificBook = databse.books.filter((book) => book.category.includes(req.params.category));
 
-    if (getSpecificBook.length === 0) {
+    if (!getSpecificBook) {
         return res.json({
             error: `No book found for the ISBN of ${req.params.category}`
         });
@@ -219,12 +244,14 @@ booky.get("/publications/book/:isbn", (req, res) => {
  * Methods          POST
 */
 
-booky.post("/book/add", (req, res) => {
+booky.post("/book/add", async (req, res) => {
     const { newBook } = req.body;
 
-    databse.books.push(newBook);
+    const addNewBook = BookModel.create(newBook);
 
-    return res.json({ books: databse.books });
+    //databse.books.push(newBook);
+
+    return res.json({ books: addNewBook, message: "Book was added!!"});
 });
 
 /** 
@@ -235,12 +262,14 @@ booky.post("/book/add", (req, res) => {
  * Methods          POST
 */
 
-booky.post("/author/add", (req, res) => {
+booky.post("/author/add", async (req, res) => {
     const { newAuthor } = req.body;
 
-    databse.authors.push(newAuthor);
+    AuthorModel.create(newAuthor);
 
-    return res.json({ Authors: databse.authors });
+   // databse.authors.push(newAuthor);
+
+    return res.json({  Message: "Author is added." });
 });
 
 
@@ -252,12 +281,14 @@ booky.post("/author/add", (req, res) => {
  * Methods          POST
 */
 
-booky.post("/publication/add", (req, res) => {
+booky.post("/publication/add", async (req, res) => {
     const { newPublication } = req.body;
 
-    databse.publications.push(newPublication);
+    PublicationModel.create(newPublication);
 
-    return res.json({ Publications: databse.publications });
+    // databse.publications.push(newPublication);
+
+    return res.json({ Message: "Publication is added. "});
 });
 
 /** 
