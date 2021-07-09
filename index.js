@@ -190,9 +190,11 @@ booky.get("/author/book/:isbn", (req, res) => {
  * Methods          GET
 */
 
-booky.get("/publication", (req, res) => {
+booky.get("/publication", async (req, res) => {
 
-    return res.json({ author: databse.publications });
+    const pulication = await PublicationModel.find();
+
+    return res.json({ author: pulication });
 
 });
 
@@ -204,10 +206,12 @@ booky.get("/publication", (req, res) => {
  * Methods          GET
 */
 
-booky.get("/publications/:id", (req, res) => {
-    const getPublications = databse.publications.filter((publication) => publication.id === parseInt(req.params.id));
+booky.get("/publications/:id", async (req, res) => {
+    // const getPublications = databse.publications.filter((publication) => publication.id === parseInt(req.params.id));
 
-    if (getPublications.length === 0) {
+    const getPublications = await PublicationModel.findOne({id: req.params.id});
+
+    if (!getPublications) {
         return res.json({
             error: `No publication found the id of ${req.params.id}`
         });
@@ -224,10 +228,12 @@ booky.get("/publications/:id", (req, res) => {
  * Methods          GET
 */
 
-booky.get("/publications/book/:isbn", (req, res) => {
-    const getSpecificPublication = databse.publications.filter((publication) => publication.books.includes(req.params.isbn));
+booky.get("/publications/book/:isbn", async (req, res) => {
+    // const getSpecificPublication = databse.publications.filter((publication) => publication.books.includes(req.params.isbn));
 
-    if (getSpecificPublication.length === 0) {
+    const getSpecificPublication = await PublicationModel.findOne({ books: req.params.isbn });
+
+    if (!getSpecificPublication) {
         return res.json({
             error: `No publication found for the ISBN of ${req.params.isbn}`
         });
