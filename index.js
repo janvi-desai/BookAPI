@@ -1,13 +1,24 @@
+require("dotenv").config();
+
 const express = require("express");
+const mongoose = require("mongoose");
 
 // Database
-const databse = require("./database");
+const databse = require("./database/database");
 
 // Initialization
 const booky = express();
 
 //configuration
 booky.use(express.json());
+
+// Establish database connection
+mongoose.connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true
+}).then(() => console.log("connection established!!!!!!!!"));
 
 /** 
  * Route            /
@@ -405,17 +416,17 @@ booky.delete("/book/delete/author/:isbn/:authorId", (req, res) => {
             return;
         }
     });
-    
+
     // update the author database
     databse.authors.forEach((author) => {
-        if(author.id === parseInt(req.params.authorId)){
+        if (author.id === parseInt(req.params.authorId)) {
             const newBookList = author.books.filter((book) => book !== req.params.isbn);
             author.books = newBookList;
             return;
         };
     });
 
-    return res.json ({book: databse.books, author: databse.authors, message: "Author was deleted!!!!!" });
+    return res.json({ book: databse.books, author: databse.authors, message: "Author was deleted!!!!!" });
 });
 
 /** 
@@ -453,7 +464,7 @@ booky.delete("/publication/delete/:id", (req, res) => {
     // Replace the whole database
 
     const updatedPubDatabase = databse.publications.filter((publication) =>
-    publication.id !== parseInt(req.params.id));
+        publication.id !== parseInt(req.params.id));
     // filter return new array.. so need to store data in new array that's why we need to generate new array
     databse.publications = updatedPubDatabase;
     return res.json({ publications: databse.publications, message: "delete publication" });
@@ -478,19 +489,36 @@ booky.delete("/book/delete/publication/:isbn/:pubId", (req, res) => {
             return;
         }
     });
-    
+
     // update the author database
     databse.publications.forEach((publication) => {
-        if(publication.id === parseInt(req.params.pubId)){
+        if (publication.id === parseInt(req.params.pubId)) {
             const newBookList = publication.books.filter((book) => book !== req.params.isbn);
             publication.books = newBookList;
             return;
         };
     });
 
-    return res.json ({book: databse.books, publication: databse.publications, message: "Publication was deleted!!!!!" });
+    return res.json({ book: databse.books, publication: databse.publications, message: "Publication was deleted!!!!!" });
 });
 
 booky.listen(3000, () => console.log("Hey, server is running !!"));
 
+
+// Talk to mongoDB in which mongoDB understands =>   *********
+// talk to us in the way we understand  => JavaScript
+
+// Mongoose
+
 // HTTP client => { client means helper.. } -> helper who helps you to make http request
+
+// why schema ?
+
+// mongoDB is schemaless
+
+// mongoose helps you with validation , relationship with other data -> mongoose is only for mongoDB
+
+// mongoose model is represent -> document model of mongoDB
+
+// First create .. Schema -> then convert into monggose model -> then use the model
+
