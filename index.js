@@ -114,10 +114,12 @@ booky.get("/c/:category", async (req, res) => {
  * Methods          GET
 */
 
-booky.get("/l/:langauge", (req, res) => {
-    const getSpecificBook = databse.books.filter((book) => book.langauge === req.params.langauge);
+booky.get("/l/:langauge", async (req, res) => {
+    const getSpecificBook = await BookModel.findOne({ langauge: req.params.langauge });
+   
+   // const getSpecificBook = databse.books.filter((book) => book.langauge === req.params.langauge);
 
-    if (getSpecificBook.length === 0) {
+    if (!getSpecificBook) {
         return res.json({
             error: `No book found for the ISBN of ${req.params.langauge}`
         });
@@ -211,7 +213,7 @@ booky.get("/publications/:id", async (req, res) => {
 
     const getPublications = await PublicationModel.findOne({id: req.params.id});
 
-    if (!getPublications) {
+    if (!getPublications) {w2
         return res.json({
             error: `No publication found the id of ${req.params.id}`
         });
@@ -305,16 +307,18 @@ booky.post("/publication/add", async (req, res) => {
  * Methods          PUT
 */
 
-booky.put("/book/update/title/:isbn", (req, res) => {
-    // forEach ..  is do direct update.
-    databse.books.forEach((book) => {
-        if (book.ISBN === req.params.isbn) {
-            book.title = req.body.newBookTitle;
-            return;
-        }
-    });
+booky.put("/book/update/title/:isbn", async (req, res) => {
+    const UpdateBook = await BookModel.findOneAndUpdate({ ISBN: req.params.isbn, },{ title: req.body.newBookTitle, },{ new: true, });
 
-    return res.json({ books: databse.books });
+    // forEach ..  is do direct update.
+    // databse.books.forEach((book) => {
+    //     if (book.ISBN === req.params.isbn) {
+    //         book.title = req.body.newBookTitle;
+    //         return;
+    //     }
+    // });
+
+    return res.json({ books: UpdateBook });
     // map .. is create new array for changes.
 });
 
