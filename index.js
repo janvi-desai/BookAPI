@@ -49,7 +49,7 @@ booky.get("/", async (req, res) => {
 */
 
 booky.get("/isbn/:isbn", async (req, res) => {
-    
+
     const getSpecificBook = await BookModel.findOne({ ISBN: req.params.isbn });
     // null -> fasle.. value -> true
 
@@ -74,9 +74,9 @@ booky.get("/isbn/:isbn", async (req, res) => {
 */
 
 booky.get("/base/:id", async (req, res) => {
-    const getSpecificBook = await BookModel.findOne({ author: req.params.id});
+    const getSpecificBook = await BookModel.findOne({ author: req.params.id });
 
-    if(!getSpecificBook){
+    if (!getSpecificBook) {
         return res.json({ Error: `no book found base on ${req.params.id}` });
     }
     return res.json({ book: getSpecificBook });
@@ -91,9 +91,9 @@ booky.get("/base/:id", async (req, res) => {
 */
 
 booky.get("/c/:category", async (req, res) => {
-    
+
     const getSpecificBook = await BookModel.findOne({ category: req.params.category });
-    
+
     // const getSpecificBook = databse.books.filter((book) => book.category.includes(req.params.category));
 
     if (!getSpecificBook) {
@@ -116,8 +116,8 @@ booky.get("/c/:category", async (req, res) => {
 
 booky.get("/l/:langauge", async (req, res) => {
     const getSpecificBook = await BookModel.findOne({ langauge: req.params.langauge });
-   
-   // const getSpecificBook = databse.books.filter((book) => book.langauge === req.params.langauge);
+
+    // const getSpecificBook = databse.books.filter((book) => book.langauge === req.params.langauge);
 
     if (!getSpecificBook) {
         return res.json({
@@ -211,9 +211,10 @@ booky.get("/publication", async (req, res) => {
 booky.get("/publications/:id", async (req, res) => {
     // const getPublications = databse.publications.filter((publication) => publication.id === parseInt(req.params.id));
 
-    const getPublications = await PublicationModel.findOne({id: req.params.id});
+    const getPublications = await PublicationModel.findOne({ id: req.params.id });
 
-    if (!getPublications) {w2
+    if (!getPublications) {
+        w2
         return res.json({
             error: `No publication found the id of ${req.params.id}`
         });
@@ -259,7 +260,7 @@ booky.post("/book/add", async (req, res) => {
 
     //databse.books.push(newBook);
 
-    return res.json({ books: addNewBook, message: "Book was added!!"});
+    return res.json({ books: addNewBook, message: "Book was added!!" });
 });
 
 /** 
@@ -275,9 +276,9 @@ booky.post("/author/add", async (req, res) => {
 
     AuthorModel.create(newAuthor);
 
-   // databse.authors.push(newAuthor);
+    // databse.authors.push(newAuthor);
 
-    return res.json({  Message: "Author is added." });
+    return res.json({ Message: "Author is added." });
 });
 
 
@@ -296,7 +297,7 @@ booky.post("/publication/add", async (req, res) => {
 
     // databse.publications.push(newPublication);
 
-    return res.json({ Message: "Publication is added. "});
+    return res.json({ Message: "Publication is added. " });
 });
 
 /** 
@@ -308,7 +309,7 @@ booky.post("/publication/add", async (req, res) => {
 */
 
 booky.put("/book/update/title/:isbn", async (req, res) => {
-    const UpdateBook = await BookModel.findOneAndUpdate({ ISBN: req.params.isbn, },{ title: req.body.newBookTitle, },{ new: true, });
+    const UpdateBook = await BookModel.findOneAndUpdate({ ISBN: req.params.isbn, }, { title: req.body.newBookTitle, }, { new: true, });
 
     // forEach ..  is do direct update.
     // databse.books.forEach((book) => {
@@ -339,15 +340,15 @@ booky.put("/book/update/author/:isbn", async (req, res) => {
     const updateBook = await BookModel.findOneAndUpdate({
         ISBN: req.params.isbn,
     },
-    {
-        $push: {
-            author: req.params.newAuthor,
+        {
+            $push: {
+                author: req.params.newAuthor,
+            },
         },
-    },
-    {
-        new: true,
-    },);
-    
+        {
+            new: true,
+        });
+
     // databse.books.forEach((book) => {
     //     if (book.ISBN === req.params.isbn) {
     //         return book.authors.push(req.body.newAuthor);
@@ -358,14 +359,14 @@ booky.put("/book/update/author/:isbn", async (req, res) => {
     const updateAuthor = await AuthorModel.findOneAndUpdate({
         id: req.params.newAuthor,
     },
-    {
-        $addToSet: {
-            books: req.params.isbn,
+        {
+            $addToSet: {
+                books: req.params.isbn,
+            },
         },
-    },
-    {
-        new: true
-    })
+        {
+            new: true
+        })
 
     // databse.authors.forEach((author) => {
     //     if (author.id === req.body.newAuthor) {
@@ -373,7 +374,7 @@ booky.put("/book/update/author/:isbn", async (req, res) => {
     //     }
     // });
 
-    return res.json({ books: updateBook , author: updateAuthor , Message: "new author updated." });
+    return res.json({ books: updateBook, author: updateAuthor, Message: "new author updated." });
 });
 //------------------------------ERROR------------------ERROR--------------------ERROR-------------------------------
 
@@ -458,15 +459,17 @@ booky.put("/publication/update/name/:id", (req, res) => {
  * 
 */
 
-booky.delete("/book/delete/:isbn", (req, res) => {
+booky.delete("/book/delete/:isbn", async (req, res) => {
+
+    const updatedBookDatabase = await BookModel.findOneAndDelete({ ISBN: req.params.isbn });
 
     // Replace the whole database
 
-    const updatedBookDatabase = databse.books.filter((book) =>
-        book.ISBN !== req.params.isbn);
+    // const updatedBookDatabase = databse.books.filter((book) =>
+    //     book.ISBN !== req.params.isbn);
     // filter return new array.. so need to store data in new array that's why we need to generate new array
-    databse.books = updatedBookDatabase;
-    return res.json({ books: databse.books });
+    // databse.books = updatedBookDatabase;
+    return res.json({ books: updatedBookDatabase });
     // Edit at single point directly to master object
 });
 
@@ -479,26 +482,52 @@ booky.delete("/book/delete/:isbn", (req, res) => {
  * 
 */
 
-booky.delete("/book/delete/author/:isbn/:authorId", (req, res) => {
+booky.delete("/book/delete/author/:isbn/:authorId", async (req, res) => {
+
+
     // update the book database
-    databse.books.forEach((book) => {
-        if (book.ISBN === req.params.isbn) {
-            const newAuthorList = book.author.filter((author) => author !== parseInt(req.params.authorId));
-            book.author = newAuthorList;
-            return;
-        }
-    });
+    const updatedBook = await BookModel.findOneAndUpdate({
+        ISBN: req.params.isbn
+    },
+        {
+            $pull: {
+                author: parseInt(req.params.authorId),
+            },
+        },
+        {
+            new: true
+        });
+
+    // databse.books.forEach((book) => {
+    //     if (book.ISBN === req.params.isbn) {
+    //         const newAuthorList = book.author.filter((author) => author !== parseInt(req.params.authorId));
+    //         book.author = newAuthorList;
+    //         return;
+    //     }
+    // });
 
     // update the author database
-    databse.authors.forEach((author) => {
-        if (author.id === parseInt(req.params.authorId)) {
-            const newBookList = author.books.filter((book) => book !== req.params.isbn);
-            author.books = newBookList;
-            return;
-        };
-    });
 
-    return res.json({ book: databse.books, author: databse.authors, message: "Author was deleted!!!!!" });
+    const updatedAuthor = await AuthorModel.findOneAndUpdate({
+        id: parseInt(req.params.authorId),
+    },
+        {
+            $pull: {
+                books: req.params.isbn
+            },
+        },
+        {
+            new: true,
+        });
+    // databse.authors.forEach((author) => {
+    //     if (author.id === parseInt(req.params.authorId)) {
+    //         const newBookList = author.books.filter((book) => book !== req.params.isbn);
+    //         author.books = newBookList;
+    //         return;
+    //     };
+    // });
+
+    return res.json({ book:updatedBook, author: updatedAuthor, message: "Author was deleted!!!!!" });
 });
 
 /** 
