@@ -539,12 +539,15 @@ booky.delete("/book/delete/author/:isbn/:authorId", async (req, res) => {
  * 
 */
 
-booky.delete("/author/delete/:id", (req, res) => {
+booky.delete("/author/delete/:id", async (req, res) => {
 
+    const updatedAuthorDatabase = await AuthorModel.findOneAndDelete({
+        id: parseInt(req.params.id)
+    })
     // Replace the whole database
 
-    const updatedAuthorDatabase = databse.authors.filter((author) =>
-        author.id !== parseInt(req.params.id));
+   // const updatedAuthorDatabase = databse.authors.filter((author) =>
+       // author.id !== parseInt(req.params.id));
     // filter return new array.. so need to store data in new array that's why we need to generate new array
     databse.authors = updatedAuthorDatabase;
     return res.json({ authors: databse.authors, message: "delete author" });
@@ -560,12 +563,14 @@ booky.delete("/author/delete/:id", (req, res) => {
  * 
 */
 
-booky.delete("/publication/delete/:id", (req, res) => {
+booky.delete("/publication/delete/:id", async (req, res) => {
 
+
+    const updatedPubDatabase = await PublicationModel.findOneAndDelete({ id: parseInt(req.params.id) });
     // Replace the whole database
 
-    const updatedPubDatabase = databse.publications.filter((publication) =>
-        publication.id !== parseInt(req.params.id));
+    //const updatedPubDatabase = databse.publications.filter((publication) =>
+      //  publication.id !== parseInt(req.params.id));
     // filter return new array.. so need to store data in new array that's why we need to generate new array
     databse.publications = updatedPubDatabase;
     return res.json({ publications: databse.publications, message: "delete publication" });
@@ -581,26 +586,51 @@ booky.delete("/publication/delete/:id", (req, res) => {
  * 
 */
 
-booky.delete("/book/delete/publication/:isbn/:pubId", (req, res) => {
+booky.delete("/book/delete/publication/:isbn/:pubId", async (req, res) => {
     // update the book database
-    databse.books.forEach((book) => {
-        if (book.ISBN === req.params.isbn) {
-            const newPubList = book.publication.filter((publication) => publication !== parseInt(req.params.pubId));
-            book.publication = newPubList;
-            return;
-        }
+
+    const updateBookdatabase = await BookModel.findOneAndUpdate({
+        ISBN: req.params.isbn
+    },
+    {
+        $pull: {
+            publication: parseInt(req.params.pubId),
+        },
+    },
+    {
+        new: true
     });
+
+    // databse.books.forEach((book) => {
+    //     if (book.ISBN === req.params.isbn) {
+    //         const newPubList = book.publication.filter((publication) => publication !== parseInt(req.params.pubId));
+    //         book.publication = newPubList;
+    //         return;
+    //     }
+    // });
 
     // update the author database
-    databse.publications.forEach((publication) => {
-        if (publication.id === parseInt(req.params.pubId)) {
-            const newBookList = publication.books.filter((book) => book !== req.params.isbn);
-            publication.books = newBookList;
-            return;
-        };
+    const updatePublication = await PublicationModel.findOneAndUpdate({
+        id: parseInt(req.params.pubId)
+    },
+    {
+        $pull: {
+            books: req.params.isbn
+        },
+    },
+    {
+        new: true,
     });
 
-    return res.json({ book: databse.books, publication: databse.publications, message: "Publication was deleted!!!!!" });
+    // databse.publications.forEach((publication) => {
+    //     if (publication.id === parseInt(req.params.pubId)) {
+    //         const newBookList = publication.books.filter((book) => book !== req.params.isbn);
+    //         publication.books = newBookList;
+    //         return;
+    //     };
+    // });
+
+    return res.json({ book: updateBookdatabase, publication: updatePublication, message: "Publication was deleted!!!!!" });
 });
 
 booky.listen(3000, () => console.log("Hey, server is running !!"));
