@@ -333,21 +333,47 @@ booky.put("/book/update/title/:isbn", async (req, res) => {
  * Methods          PUT
 */
 
-booky.put("/book/update/author/:isbn/:authorId", (req, res) => {
-    // Update book database
-    databse.books.forEach((book) => {
-        if (book.ISBN === req.params.isbn) {
-            return book.author.push(parseInt(req.params.authorId));
-        }
-    });
-    // Update author database
-    databse.authors.forEach((author) => {
-        if (author.id === parseInt(req.params.authorId)) {
-            return author.book.push(req.params.isbn);
-        }
-    });
+booky.put("/book/update/author/:isbn", async (req, res) => {
 
-    return res.json({ books: databse.books, author: databse.authors });
+    // Update book database
+    const updateBook = await BookModel.findOneAndUpdate({
+        ISBN: req.params.isbn,
+    },
+    {
+        $push: {
+            author: req.params.newAuthor,
+        },
+    },
+    {
+        new: true,
+    },);
+    
+    // databse.books.forEach((book) => {
+    //     if (book.ISBN === req.params.isbn) {
+    //         return book.authors.push(req.body.newAuthor);
+    //     }
+    // });
+
+    // Update author database
+    const updateAuthor = await AuthorModel.findOneAndUpdate({
+        id: req.params.newAuthor,
+    },
+    {
+        $addToSet: {
+            books: req.params.isbn,
+        },
+    },
+    {
+        new: true
+    })
+
+    // databse.authors.forEach((author) => {
+    //     if (author.id === req.body.newAuthor) {
+    //         return author.book.push(req.params.isbn);
+    //     }
+    // });
+
+    return res.json({ books: updateBook , author: updateAuthor , Message: "new author updated." });
 });
 //------------------------------ERROR------------------ERROR--------------------ERROR-------------------------------
 
